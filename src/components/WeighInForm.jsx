@@ -41,8 +41,10 @@ export default function WeighInForm({ existingWeighIn, onComplete }) {
           <h3 className="font-display text-sm font-semibold text-white uppercase tracking-wider">Weigh-In</h3>
         </div>
         <p className="text-gray-400 text-sm">
-          {weekData ? `${weekData.label}` : `Week ${currentWeek}`} — Weigh-ins are on Mondays (with Tuesday grace window).
-          {!canLog && ' Come back on Monday!'}
+          {currentWeek >= 9
+            ? 'The challenge is over! Final results are in.'
+            : 'The challenge hasn\'t reached this week yet. Hang tight!'
+          }
         </p>
       </div>
     )

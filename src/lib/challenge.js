@@ -44,7 +44,7 @@ export function getWeighInWindowForWeek(weekNumber) {
   if (!weekData) return null
 
   const monday = startOfDay(new Date(weekData.date + 'T00:00:00'))
-  const windowEnd = addDays(monday, 2) // Grace: Monday + Tuesday
+  const windowEnd = addDays(monday, 7) // Full week window (Mon through Sun)
 
   return { start: monday, end: windowEnd }
 }
@@ -54,7 +54,7 @@ export function canLogForWeek(weekNumber) {
   if (!window) return false
 
   const now = startOfDay(new Date())
-  return now >= window.start && now <= window.end
+  return now >= window.start && now < window.end
 }
 
 export function getPercentageLost(startWeight, currentWeight) {

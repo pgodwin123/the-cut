@@ -10,6 +10,7 @@ import WeighInForm from '../components/WeighInForm'
 import WeightChart from '../components/WeightChart'
 import StreakTracker from '../components/StreakTracker'
 import UnitToggle from '../components/UnitToggle'
+import WeighInReminder from '../components/WeighInReminder'
 import { Flame, LogOut, Settings } from 'lucide-react'
 
 export default function Dashboard() {
@@ -112,6 +113,9 @@ export default function Dashboard() {
       )}
 
       <div className="space-y-4">
+        {/* Weigh-in reminder */}
+        <WeighInReminder hasLoggedThisWeek={!!myCurrentWeekEntry} />
+
         {/* Countdown */}
         <Countdown />
 

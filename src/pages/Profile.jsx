@@ -23,11 +23,14 @@ export default function Profile() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
+  const [uploadError, setUploadError] = useState('')
+
   async function handlePhotoUpload(e) {
     const file = e.target.files?.[0]
     if (!file) return
 
     setUploading(true)
+    setUploadError('')
     const ext = file.name.split('.').pop()
     const path = `${session.user.id}/avatar.${ext}`
 
@@ -35,12 +38,16 @@ export default function Profile() {
       .from('avatars')
       .upload(path, file, { upsert: true })
 
-    if (!error) {
-      const { data } = supabase.storage.from('avatars').getPublicUrl(path)
-      const url = data.publicUrl + '?t=' + Date.now()
-      setPhotoUrl(url)
-      await updateProfile({ photo_url: url })
+    if (error) {
+      setUploadError(error.message)
+      setUploading(false)
+      return
     }
+
+    const { data } = supabase.storage.from('avatars').getPublicUrl(path)
+    const url = data.publicUrl + '?t=' + Date.now()
+    setPhotoUrl(url)
+    await updateProfile({ photo_url: url })
     setUploading(false)
   }
 
@@ -102,6 +109,9 @@ export default function Profile() {
           <p className="text-xs text-gray-400 mt-2">
             {uploading ? 'Uploading...' : 'Tap to change photo'}
           </p>
+          {uploadError && (
+            <p className="text-xs text-cut-red mt-1">{uploadError}</p>
+          )}
         </div>
 
         <div className="card p-5 space-y-4">
