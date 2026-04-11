@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', sans-serif;
+  --font-display: 'Space Grotesk', sans-serif;
+  --color-cut-green: #00ff87;
+  --color-cut-red: #ff4757;
+  --color-cut-gold: #ffd700;
+  --color-cut-purple: #a855f7;
+  --color-cut-cyan: #06b6d4;
+  --color-gray-950: #0a0a0f;
+  --color-gray-900: #111118;
+  --color-gray-850: #16161f;
+  --color-gray-800: #1e1e2a;
+  --color-gray-700: #2a2a3a;
+  --color-gray-600: #3a3a4f;
+  --color-gray-400: #8888a0;
+  --color-gray-300: #aaaabb;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-gray-950);
+  min-height: 100dvh;
+  margin: 0;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.glow-green {
+  box-shadow: 0 0 20px rgba(0, 255, 135, 0.15), 0 0 60px rgba(0, 255, 135, 0.05);
+}
+
+.glow-red {
+  box-shadow: 0 0 20px rgba(255, 71, 87, 0.15), 0 0 60px rgba(255, 71, 87, 0.05);
+}
+
+.card {
+  background: var(--color-gray-900);
+  border: 1px solid var(--color-gray-800);
+  border-radius: 1rem;
+}
+
+.card-inner {
+  background: var(--color-gray-850);
+  border: 1px solid var(--color-gray-700);
+  border-radius: 0.75rem;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.5s ease-out forwards;
+}
