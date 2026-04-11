@@ -2,6 +2,8 @@ import { useState, useRef } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { useUnits } from '../hooks/useUnits'
 import { supabase } from '../lib/supabase'
+import { getAvatarUrl } from '../lib/avatar'
+import imageCompression from 'browser-image-compression'
 import { User, Camera, Save, ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import UnitToggle from '../components/UnitToggle'
@@ -31,23 +33,36 @@ export default function Profile() {
 
     setUploading(true)
     setUploadError('')
-    const ext = file.name.split('.').pop()
-    const path = `${session.user.id}/avatar.${ext}`
 
-    const { error } = await supabase.storage
-      .from('avatars')
-      .upload(path, file, { upsert: true })
+    try {
+      // Convert any format (HEIC, PNG, WebP, etc.) to JPEG for browser compatibility
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 512,
+        useWebWorker: true,
+        fileType: 'image/jpeg',
+      })
 
-    if (error) {
-      setUploadError(error.message)
-      setUploading(false)
-      return
+      const path = `${session.user.id}/avatar.jpg`
+
+      const { error } = await supabase.storage
+        .from('avatars')
+        .upload(path, compressed, {
+          upsert: true,
+          contentType: 'image/jpeg',
+        })
+
+      if (error) {
+        setUploadError(error.message)
+        setUploading(false)
+        return
+      }
+
+      setPhotoUrl(path)
+      await updateProfile({ photo_url: path })
+    } catch (err) {
+      setUploadError('Failed to process image: ' + err.message)
     }
-
-    const { data } = supabase.storage.from('avatars').getPublicUrl(path)
-    const url = data.publicUrl + '?t=' + Date.now()
-    setPhotoUrl(url)
-    await updateProfile({ photo_url: url })
     setUploading(false)
   }
 
@@ -86,18 +101,20 @@ export default function Profile() {
 
       <form onSubmit={handleSave} className="space-y-4 animate-slide-up">
         <div className="card p-6 flex flex-col items-center">
-          <div
-            className="w-24 h-24 rounded-full bg-gray-800 border-2 border-gray-700 overflow-hidden flex items-center justify-center cursor-pointer relative group"
-            onClick={() => fileRef.current?.click()}
-          >
-            {photoUrl ? (
-              <img src={photoUrl} alt="Profile" className="w-full h-full object-cover" />
+          <div onClick={() => fileRef.current?.click()} className="cursor-pointer">
+            {getAvatarUrl(photoUrl) ? (
+              <img
+                src={getAvatarUrl(photoUrl)}
+                alt="Profile"
+                width={96}
+                height={96}
+                style={{ borderRadius: '50%', objectFit: 'cover', display: 'block' }}
+              />
             ) : (
-              <User className="w-10 h-10 text-gray-600" />
+              <div className="w-24 h-24 rounded-full bg-gray-800 border-2 border-gray-700 flex items-center justify-center">
+                <User className="w-10 h-10 text-gray-600" />
+              </div>
             )}
-            <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <Camera className="w-6 h-6 text-white" />
-            </div>
           </div>
           <input
             ref={fileRef}

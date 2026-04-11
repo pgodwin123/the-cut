@@ -1,4 +1,5 @@
 import { getPercentageLost } from '../lib/challenge'
+import { getAvatarUrl } from '../lib/avatar'
 import { useUnits } from '../hooks/useUnits'
 import { TrendingDown, TrendingUp, Target, User } from 'lucide-react'
 
@@ -26,11 +27,18 @@ export default function ProfileCard({ profile, weighIns, isLeading, rank }) {
       )}
 
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-14 h-14 rounded-full bg-gray-800 border-2 border-gray-700 overflow-hidden flex items-center justify-center flex-shrink-0">
-          {profile?.photo_url ? (
-            <img src={profile.photo_url} alt={profile.name} className="w-full h-full object-cover" />
-          ) : (
-            <User className="w-6 h-6 text-gray-600" />
+        <div
+          className="w-14 h-14 rounded-full border-2 border-gray-700 flex-shrink-0"
+          style={{
+            background: getAvatarUrl(profile?.photo_url)
+              ? `url(${getAvatarUrl(profile.photo_url)}) center/cover no-repeat`
+              : '#1e1e2a',
+          }}
+        >
+          {!getAvatarUrl(profile?.photo_url) && (
+            <div className="w-full h-full flex items-center justify-center">
+              <User className="w-6 h-6 text-gray-600" />
+            </div>
           )}
         </div>
         <div>
