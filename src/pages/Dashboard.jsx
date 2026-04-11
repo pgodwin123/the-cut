@@ -11,6 +11,7 @@ import WeightChart from '../components/WeightChart'
 import StreakTracker from '../components/StreakTracker'
 import UnitToggle from '../components/UnitToggle'
 import WeighInReminder from '../components/WeighInReminder'
+import LeaderBanner from '../components/LeaderBanner'
 import { Flame, LogOut, Settings } from 'lucide-react'
 
 export default function Dashboard() {
@@ -80,7 +81,7 @@ export default function Dashboard() {
   const showEditForm = canEdit
 
   return (
-    <div className="min-h-dvh p-4 pb-8 max-w-lg mx-auto">
+    <div className="min-h-dvh px-3 py-4 pb-8 max-w-lg mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
@@ -113,6 +114,11 @@ export default function Dashboard() {
       )}
 
       <div className="space-y-4">
+        {/* Who's Leading — top of everything */}
+        {profiles.length === 2 && (
+          <LeaderBanner profiles={profiles} weighInsByUser={weighInsByUser} />
+        )}
+
         {/* Weigh-in reminder */}
         <WeighInReminder hasLoggedThisWeek={!!myCurrentWeekEntry} />
 

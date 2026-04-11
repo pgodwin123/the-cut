@@ -17,23 +17,23 @@ export default function Countdown() {
         <h3 className="font-display text-sm font-semibold text-white uppercase tracking-wider">Challenge Clock</h3>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
-        <div className="card-inner p-3 text-center">
-          <Calendar className="w-4 h-4 text-gray-400 mx-auto mb-1" />
-          <div className="font-display text-2xl font-bold text-white">{daysLeft}</div>
-          <div className="text-xs text-gray-400">Days Left</div>
+      <div className="grid grid-cols-3 gap-2">
+        <div className="card-inner p-2.5 text-center min-w-0">
+          <Calendar className="w-3.5 h-3.5 text-gray-400 mx-auto mb-1" />
+          <div className="font-display text-xl font-bold text-white">{daysLeft}</div>
+          <div className="text-[10px] text-gray-400">Days Left</div>
         </div>
 
-        <div className="card-inner p-3 text-center">
-          <div className="w-4 h-4 mx-auto mb-1 text-cut-purple font-bold text-sm">W</div>
-          <div className="font-display text-2xl font-bold text-white">{currentWeek || '—'}</div>
-          <div className="text-xs text-gray-400">{weekLabel}</div>
+        <div className="card-inner p-2.5 text-center min-w-0">
+          <div className="w-3.5 h-3.5 mx-auto mb-1 text-cut-purple font-bold text-xs">W</div>
+          <div className="font-display text-xl font-bold text-white">{currentWeek || '—'}</div>
+          <div className="text-[10px] text-gray-400 truncate">{weekLabel}</div>
         </div>
 
-        <div className="card-inner p-3 text-center">
-          <Trophy className="w-4 h-4 text-cut-gold mx-auto mb-1" />
-          <div className="font-display text-2xl font-bold text-cut-gold">${BET_AMOUNT}</div>
-          <div className="text-xs text-gray-400">On The Line</div>
+        <div className="card-inner p-2.5 text-center min-w-0">
+          <Trophy className="w-3.5 h-3.5 text-cut-gold mx-auto mb-1" />
+          <div className="font-display text-xl font-bold text-cut-gold">${BET_AMOUNT}</div>
+          <div className="text-[10px] text-gray-400">On The Line</div>
         </div>
       </div>
     </div>
