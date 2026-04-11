@@ -1,15 +1,22 @@
 import { useState, useRef } from 'react'
 import { useAuth } from '../hooks/useAuth'
+import { useUnits } from '../hooks/useUnits'
 import { supabase } from '../lib/supabase'
 import { User, Camera, Save, ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import UnitToggle from '../components/UnitToggle'
 
 export default function Profile() {
   const { profile, session, updateProfile } = useAuth()
+  const { unit, toKg, fromKg } = useUnits()
   const fileRef = useRef(null)
   const [name, setName] = useState(profile?.name || '')
-  const [startingWeight, setStartingWeight] = useState(profile?.starting_weight || '')
-  const [goalWeight, setGoalWeight] = useState(profile?.goal_weight || '')
+  const [startingWeight, setStartingWeight] = useState(
+    profile?.starting_weight ? fromKg(Number(profile.starting_weight)).toFixed(1) : ''
+  )
+  const [goalWeight, setGoalWeight] = useState(
+    profile?.goal_weight ? fromKg(Number(profile.goal_weight)).toFixed(1) : ''
+  )
   const [motivation, setMotivation] = useState(profile?.motivation || '')
   const [photoUrl, setPhotoUrl] = useState(profile?.photo_url || '')
   const [uploading, setUploading] = useState(false)
@@ -41,10 +48,14 @@ export default function Profile() {
     e.preventDefault()
     setSaving(true)
 
+    // Convert display values to kg for storage
+    const startKg = startingWeight ? toKg(parseFloat(startingWeight)) : null
+    const goalKg = goalWeight ? toKg(parseFloat(goalWeight)) : null
+
     await updateProfile({
       name,
-      starting_weight: parseFloat(startingWeight) || null,
-      goal_weight: parseFloat(goalWeight) || null,
+      starting_weight: startKg,
+      goal_weight: goalKg,
       motivation,
       photo_url: photoUrl,
     })
@@ -56,11 +67,14 @@ export default function Profile() {
 
   return (
     <div className="min-h-dvh p-4 max-w-lg mx-auto">
-      <div className="flex items-center gap-3 mb-6">
-        <Link to="/" className="text-gray-400 hover:text-white transition-colors">
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-        <h1 className="font-display text-xl font-bold text-white">Edit Profile</h1>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <Link to="/" className="text-gray-400 hover:text-white transition-colors">
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+          <h1 className="font-display text-xl font-bold text-white">Edit Profile</h1>
+        </div>
+        <UnitToggle />
       </div>
 
       <form onSubmit={handleSave} className="space-y-4 animate-slide-up">
@@ -105,25 +119,25 @@ export default function Profile() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm text-gray-400 mb-1.5">Starting Weight (kg)</label>
+              <label className="block text-sm text-gray-400 mb-1.5">Starting Weight ({unit})</label>
               <input
                 type="number"
                 step="0.1"
                 value={startingWeight}
                 onChange={(e) => setStartingWeight(e.target.value)}
                 className="w-full bg-gray-850 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cut-purple transition-colors"
-                placeholder="e.g. 90.0"
+                placeholder={unit === 'lbs' ? 'e.g. 200.0' : 'e.g. 90.0'}
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-1.5">Goal Weight (kg)</label>
+              <label className="block text-sm text-gray-400 mb-1.5">Goal Weight ({unit})</label>
               <input
                 type="number"
                 step="0.1"
                 value={goalWeight}
                 onChange={(e) => setGoalWeight(e.target.value)}
                 className="w-full bg-gray-850 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cut-purple transition-colors"
-                placeholder="e.g. 80.0"
+                placeholder={unit === 'lbs' ? 'e.g. 180.0' : 'e.g. 80.0'}
               />
             </div>
           </div>

@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { useUnits } from '../hooks/useUnits'
 import { getCurrentWeek, canLogForWeek, WEEK_DATES } from '../lib/challenge'
 import { Scale, AlertTriangle, Check, X } from 'lucide-react'
 
 export default function WeighInForm({ existingWeighIn, onComplete }) {
   const { session } = useAuth()
+  const { unit, toKg, displayWeight } = useUnits()
   const currentWeek = getCurrentWeek()
   const canLog = canLogForWeek(currentWeek)
   const [weight, setWeight] = useState('')
@@ -55,7 +57,7 @@ export default function WeighInForm({ existingWeighIn, onComplete }) {
         </div>
         <div className="card-inner p-4 text-center">
           <Check className="w-6 h-6 text-cut-green mx-auto mb-2" />
-          <p className="text-white font-semibold">{Number(existingWeighIn.weight).toFixed(1)} kg</p>
+          <p className="text-white font-semibold">{displayWeight(existingWeighIn.weight)} {unit}</p>
           <p className="text-gray-400 text-xs mt-1">Locked in for {weekData?.label || `Week ${currentWeek}`}</p>
         </div>
       </div>
@@ -66,9 +68,18 @@ export default function WeighInForm({ existingWeighIn, onComplete }) {
     setLoading(true)
     setError('')
 
-    const weightNum = parseFloat(weight)
-    if (isNaN(weightNum) || weightNum < 30 || weightNum > 300) {
-      setError('Enter a valid weight (30-300 kg)')
+    const inputNum = parseFloat(weight)
+    if (isNaN(inputNum) || inputNum <= 0) {
+      setError('Enter a valid weight')
+      setLoading(false)
+      return
+    }
+
+    // Convert to kg for storage
+    const weightKg = toKg(inputNum)
+
+    if (weightKg < 20 || weightKg > 300) {
+      setError('Weight seems out of range. Double-check your entry.')
       setLoading(false)
       return
     }
@@ -77,7 +88,7 @@ export default function WeighInForm({ existingWeighIn, onComplete }) {
       const { error } = await supabase
         .from('weigh_ins')
         .update({
-          weight: weightNum,
+          weight: weightKg,
           edits_used: 1,
           locked: true,
           recorded_at: new Date().toISOString(),
@@ -97,7 +108,7 @@ export default function WeighInForm({ existingWeighIn, onComplete }) {
         .insert({
           user_id: session.user.id,
           week_number: currentWeek,
-          weight: weightNum,
+          weight: weightKg,
           edits_used: 0,
           locked: false,
         })
@@ -112,7 +123,7 @@ export default function WeighInForm({ existingWeighIn, onComplete }) {
     }
   }
 
-  const editsRemaining = isEdit ? 0 : 1
+  const displayInputWeight = weight ? parseFloat(weight).toFixed(1) : '—'
 
   return (
     <div className="card p-5">
@@ -135,10 +146,10 @@ export default function WeighInForm({ existingWeighIn, onComplete }) {
             step="0.1"
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
-            placeholder={existingWeighIn ? `Current: ${Number(existingWeighIn.weight).toFixed(1)}` : 'Enter weight'}
+            placeholder={existingWeighIn ? `Current: ${displayWeight(existingWeighIn.weight)}` : `Enter weight`}
             className="w-full bg-gray-850 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cut-purple transition-colors"
           />
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 text-sm">kg</span>
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 text-sm">{unit}</span>
         </div>
         <button
           onClick={() => weight && setShowConfirm(true)}
@@ -151,7 +162,7 @@ export default function WeighInForm({ existingWeighIn, onComplete }) {
 
       {!isEdit && existingWeighIn && (
         <p className="text-xs text-gray-400 mt-2">
-          You have <span className="text-cut-gold font-semibold">{editsRemaining} edit</span> remaining this week.
+          You have <span className="text-cut-gold font-semibold">1 edit</span> remaining this week.
         </p>
       )}
 
@@ -165,7 +176,7 @@ export default function WeighInForm({ existingWeighIn, onComplete }) {
               <h4 className="font-display text-lg font-bold text-white">Confirm Weigh-In</h4>
             </div>
             <p className="text-gray-300 text-sm mb-1">
-              Lock in <span className="text-white font-bold">{parseFloat(weight).toFixed(1)} kg</span> for {weekData?.label || `Week ${currentWeek}`}?
+              Lock in <span className="text-white font-bold">{displayInputWeight} {unit}</span> for {weekData?.label || `Week ${currentWeek}`}?
             </p>
             {isEdit ? (
               <p className="text-cut-red text-xs mb-4 flex items-center gap-1">

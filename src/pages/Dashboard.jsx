@@ -9,6 +9,7 @@ import Leaderboard from '../components/Leaderboard'
 import WeighInForm from '../components/WeighInForm'
 import WeightChart from '../components/WeightChart'
 import StreakTracker from '../components/StreakTracker'
+import UnitToggle from '../components/UnitToggle'
 import { Flame, LogOut, Settings } from 'lucide-react'
 
 export default function Dashboard() {
@@ -86,6 +87,7 @@ export default function Dashboard() {
           <h1 className="font-display text-xl font-bold text-white tracking-tight">THE CUT</h1>
         </div>
         <div className="flex items-center gap-2">
+          <UnitToggle />
           <Link
             to="/profile"
             className="p-2 text-gray-400 hover:text-white transition-colors"

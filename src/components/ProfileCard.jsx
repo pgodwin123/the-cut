@@ -1,18 +1,21 @@
 import { getPercentageLost } from '../lib/challenge'
+import { useUnits } from '../hooks/useUnits'
 import { TrendingDown, TrendingUp, Target, User } from 'lucide-react'
 
 export default function ProfileCard({ profile, weighIns, isLeading, rank }) {
+  const { unit, displayWeight, displayDiff } = useUnits()
+
   const latestWeighIn = weighIns?.length
     ? weighIns.reduce((a, b) => a.week_number > b.week_number ? a : b)
     : null
 
   const currentWeight = latestWeighIn?.weight || profile?.starting_weight
-  const totalLost = profile?.starting_weight && currentWeight
-    ? (profile.starting_weight - currentWeight).toFixed(1)
-    : '0.0'
+  const totalLostKg = profile?.starting_weight && currentWeight
+    ? profile.starting_weight - currentWeight
+    : 0
   const percentLost = getPercentageLost(profile?.starting_weight, currentWeight)
 
-  const isPositiveProgress = Number(totalLost) > 0
+  const isPositiveProgress = totalLostKg > 0
 
   return (
     <div className={`card p-5 relative overflow-hidden ${isLeading ? 'glow-green' : ''}`}>
@@ -40,16 +43,16 @@ export default function ProfileCard({ profile, weighIns, isLeading, rank }) {
         <div className="card-inner p-3">
           <div className="text-xs text-gray-400 mb-1">Current</div>
           <div className="font-display text-xl font-bold text-white">
-            {currentWeight ? `${Number(currentWeight).toFixed(1)}` : '—'}
-            <span className="text-xs text-gray-400 ml-1">kg</span>
+            {displayWeight(currentWeight)}
+            <span className="text-xs text-gray-400 ml-1">{unit}</span>
           </div>
         </div>
 
         <div className="card-inner p-3">
           <div className="text-xs text-gray-400 mb-1">Start</div>
           <div className="font-display text-xl font-bold text-gray-300">
-            {profile?.starting_weight ? `${Number(profile.starting_weight).toFixed(1)}` : '—'}
-            <span className="text-xs text-gray-400 ml-1">kg</span>
+            {displayWeight(profile?.starting_weight)}
+            <span className="text-xs text-gray-400 ml-1">{unit}</span>
           </div>
         </div>
 
@@ -59,7 +62,7 @@ export default function ProfileCard({ profile, weighIns, isLeading, rank }) {
             Lost
           </div>
           <div className={`font-display text-xl font-bold ${isPositiveProgress ? 'text-cut-green' : 'text-cut-red'}`}>
-            {totalLost} kg
+            {displayDiff(totalLostKg)} {unit}
           </div>
         </div>
 
@@ -77,10 +80,10 @@ export default function ProfileCard({ profile, weighIns, isLeading, rank }) {
       {profile?.goal_weight && (
         <div className="mt-3 pt-3 border-t border-gray-800">
           <div className="flex justify-between items-center text-xs">
-            <span className="text-gray-400">Goal: {Number(profile.goal_weight).toFixed(1)} kg</span>
+            <span className="text-gray-400">Goal: {displayWeight(profile.goal_weight)} {unit}</span>
             {profile.starting_weight && currentWeight && (
               <span className="text-gray-400">
-                {Math.max(0, (currentWeight - profile.goal_weight)).toFixed(1)} kg to go
+                {displayDiff(Math.max(0, currentWeight - profile.goal_weight))} {unit} to go
               </span>
             )}
           </div>

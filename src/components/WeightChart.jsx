@@ -1,8 +1,11 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { WEEK_DATES } from '../lib/challenge'
+import { useUnits } from '../hooks/useUnits'
 import { TrendingDown } from 'lucide-react'
 
 export default function WeightChart({ profiles, weighInsByUser }) {
+  const { unit, fromKg } = useUnits()
+
   const chartData = WEEK_DATES.map(({ week, label }) => {
     const point = { week: label.replace('Week ', 'W').replace('Final Weigh-In', 'Final') }
 
@@ -10,7 +13,7 @@ export default function WeightChart({ profiles, weighInsByUser }) {
       const userWeighIns = weighInsByUser[profile.id] || []
       const weekEntry = userWeighIns.find(w => w.week_number === week)
       if (weekEntry) {
-        point[profile.name] = Number(weekEntry.weight)
+        point[profile.name] = Number(fromKg(Number(weekEntry.weight)).toFixed(1))
       }
     })
 
@@ -37,7 +40,7 @@ export default function WeightChart({ profiles, weighInsByUser }) {
     <div className="card p-5">
       <div className="flex items-center gap-2 mb-4">
         <TrendingDown className="w-4 h-4 text-cut-cyan" />
-        <h3 className="font-display text-sm font-semibold text-white uppercase tracking-wider">Progress Chart</h3>
+        <h3 className="font-display text-sm font-semibold text-white uppercase tracking-wider">Progress Chart ({unit})</h3>
       </div>
 
       <div className="h-64">
@@ -55,6 +58,7 @@ export default function WeightChart({ profiles, weighInsByUser }) {
               axisLine={{ stroke: '#2a2a3a' }}
               tickLine={false}
               domain={['dataMin - 2', 'dataMax + 2']}
+              unit={` ${unit}`}
             />
             <Tooltip
               contentStyle={{
@@ -64,6 +68,7 @@ export default function WeightChart({ profiles, weighInsByUser }) {
                 fontSize: '12px',
               }}
               labelStyle={{ color: '#fff' }}
+              formatter={(value) => [`${value} ${unit}`, undefined]}
             />
             <Legend
               wrapperStyle={{ fontSize: '12px' }}
