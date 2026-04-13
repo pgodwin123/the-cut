@@ -138,13 +138,7 @@ export default function Dashboard() {
         </div>
 
         {/* Weigh-In Form */}
-        {!myCurrentWeekEntry ? (
-          <WeighInForm onComplete={fetchData} />
-        ) : showEditForm ? (
-          <WeighInForm existingWeighIn={myCurrentWeekEntry} onComplete={fetchData} />
-        ) : (
-          <WeighInForm existingWeighIn={myCurrentWeekEntry} onComplete={fetchData} />
-        )}
+        <WeighInForm userWeighIns={myWeighIns} onComplete={fetchData} />
 
         {/* Leaderboard */}
         {profiles.length === 2 && (

@@ -1,25 +1,48 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useUnits } from '../hooks/useUnits'
-import { getCurrentWeek, canLogForWeek, WEEK_DATES } from '../lib/challenge'
+import { getCurrentWeek, WEEK_DATES } from '../lib/challenge'
 import { Scale, AlertTriangle, Check, X } from 'lucide-react'
 
-export default function WeighInForm({ existingWeighIn, onComplete }) {
+export default function WeighInForm({ userWeighIns = [], onComplete }) {
   const { session } = useAuth()
   const { unit, toKg, displayWeight } = useUnits()
   const currentWeek = getCurrentWeek()
-  const canLog = canLogForWeek(currentWeek)
+
+  // Which weeks can this user log for?
+  // - Any past or current week up to currentWeek
+  // - Week must either not be logged yet, OR logged but still editable (edits_used < 1, not locked)
+  const availableWeeks = useMemo(() => {
+    if (currentWeek === 0) return []
+    const weighInsByWeek = new Map(userWeighIns.map(w => [w.week_number, w]))
+
+    return WEEK_DATES.filter(({ week }) => {
+      if (week > currentWeek) return false
+      const existing = weighInsByWeek.get(week)
+      if (!existing) return true // not logged yet — available
+      return !existing.locked && (existing.edits_used || 0) < 1 // editable
+    }).map(({ week, label }) => {
+      const existing = weighInsByWeek.get(week)
+      return { week, label, existing }
+    })
+  }, [userWeighIns, currentWeek])
+
+  // Default to current week if available, otherwise first available week
+  const defaultWeek = availableWeeks.find(w => w.week === currentWeek)?.week
+    || availableWeeks[0]?.week
+    || currentWeek
+
+  const [selectedWeek, setSelectedWeek] = useState(defaultWeek)
   const [weight, setWeight] = useState('')
   const [showConfirm, setShowConfirm] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  const selectedWeekInfo = availableWeeks.find(w => w.week === selectedWeek)
+  const existingWeighIn = selectedWeekInfo?.existing
   const isEdit = !!existingWeighIn
-  const editsUsed = existingWeighIn?.edits_used || 0
-  const isFullyLocked = existingWeighIn?.locked || editsUsed >= 1
-
-  const weekData = WEEK_DATES.find(w => w.week === currentWeek)
+  const weekData = WEEK_DATES.find(w => w.week === selectedWeek)
 
   if (currentWeek === 0) {
     return (
@@ -33,24 +56,7 @@ export default function WeighInForm({ existingWeighIn, onComplete }) {
     )
   }
 
-  if (!canLog && !existingWeighIn) {
-    return (
-      <div className="card p-5">
-        <div className="flex items-center gap-2 mb-3">
-          <Scale className="w-4 h-4 text-cut-purple" />
-          <h3 className="font-display text-sm font-semibold text-white uppercase tracking-wider">Weigh-In</h3>
-        </div>
-        <p className="text-gray-400 text-sm">
-          {currentWeek >= 9
-            ? 'The challenge is over! Final results are in.'
-            : 'The challenge hasn\'t reached this week yet. Hang tight!'
-          }
-        </p>
-      </div>
-    )
-  }
-
-  if (isFullyLocked) {
+  if (availableWeeks.length === 0) {
     return (
       <div className="card p-5">
         <div className="flex items-center gap-2 mb-3">
@@ -59,8 +65,11 @@ export default function WeighInForm({ existingWeighIn, onComplete }) {
         </div>
         <div className="card-inner p-4 text-center">
           <Check className="w-6 h-6 text-cut-green mx-auto mb-2" />
-          <p className="text-white font-semibold">{displayWeight(existingWeighIn.weight)} {unit}</p>
-          <p className="text-gray-400 text-xs mt-1">Locked in for {weekData?.label || `Week ${currentWeek}`}</p>
+          <p className="text-white font-semibold text-sm">All caught up!</p>
+          <p className="text-gray-400 text-xs mt-1">
+            You've logged every available week. Next weigh-in{' '}
+            {currentWeek < 9 ? `opens Monday for Week ${currentWeek + 1}` : 'was the final one'}.
+          </p>
         </div>
       </div>
     )
@@ -77,7 +86,6 @@ export default function WeighInForm({ existingWeighIn, onComplete }) {
       return
     }
 
-    // Convert to kg for storage
     const weightKg = toKg(inputNum)
 
     if (weightKg < 20 || weightKg > 300) {
@@ -102,6 +110,7 @@ export default function WeighInForm({ existingWeighIn, onComplete }) {
         setLoading(false)
       } else {
         setShowConfirm(false)
+        setWeight('')
         onComplete?.()
       }
     } else {
@@ -109,7 +118,7 @@ export default function WeighInForm({ existingWeighIn, onComplete }) {
         .from('weigh_ins')
         .insert({
           user_id: session.user.id,
-          week_number: currentWeek,
+          week_number: selectedWeek,
           weight: weightKg,
           edits_used: 0,
           locked: false,
@@ -120,12 +129,14 @@ export default function WeighInForm({ existingWeighIn, onComplete }) {
         setLoading(false)
       } else {
         setShowConfirm(false)
+        setWeight('')
         onComplete?.()
       }
     }
   }
 
   const displayInputWeight = weight ? parseFloat(weight).toFixed(1) : '—'
+  const hasMissedWeeks = availableWeeks.some(w => w.week < currentWeek && !w.existing)
 
   return (
     <div className="card p-5">
@@ -136,9 +147,33 @@ export default function WeighInForm({ existingWeighIn, onComplete }) {
         </h3>
       </div>
 
+      {availableWeeks.length > 1 && (
+        <div className="mb-3">
+          <label className="block text-xs text-gray-400 mb-1.5">Which week?</label>
+          <select
+            value={selectedWeek}
+            onChange={(e) => setSelectedWeek(Number(e.target.value))}
+            className="w-full bg-gray-850 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-cut-purple"
+          >
+            {availableWeeks.map(({ week, label, existing }) => (
+              <option key={week} value={week}>
+                {label}
+                {existing ? ' (edit)' : week < currentWeek ? ' — missed!' : ''}
+              </option>
+            ))}
+          </select>
+          {hasMissedWeeks && !isEdit && selectedWeek < currentWeek && (
+            <p className="text-xs text-cut-gold mt-1.5 flex items-center gap-1">
+              <AlertTriangle className="w-3 h-3" />
+              Logging a missed week
+            </p>
+          )}
+        </div>
+      )}
+
       <p className="text-gray-400 text-sm mb-3">
-        {weekData?.label || `Week ${currentWeek}`}
-        {isEdit && <span className="text-cut-gold ml-2">— Final edit (no more changes after this)</span>}
+        {weekData?.label || `Week ${selectedWeek}`}
+        {isEdit && <span className="text-cut-gold ml-2">— Final edit (no more changes)</span>}
       </p>
 
       <div className="flex gap-2">
@@ -162,9 +197,9 @@ export default function WeighInForm({ existingWeighIn, onComplete }) {
         </button>
       </div>
 
-      {!isEdit && existingWeighIn && (
+      {!isEdit && (
         <p className="text-xs text-gray-400 mt-2">
-          You have <span className="text-cut-gold font-semibold">1 edit</span> remaining this week.
+          After confirming, you'll have <span className="text-cut-gold font-semibold">1 edit</span> for this week.
         </p>
       )}
 
@@ -178,12 +213,12 @@ export default function WeighInForm({ existingWeighIn, onComplete }) {
               <h4 className="font-display text-lg font-bold text-white">Confirm Weigh-In</h4>
             </div>
             <p className="text-gray-300 text-sm mb-1">
-              Lock in <span className="text-white font-bold">{displayInputWeight} {unit}</span> for {weekData?.label || `Week ${currentWeek}`}?
+              Lock in <span className="text-white font-bold">{displayInputWeight} {unit}</span> for {weekData?.label || `Week ${selectedWeek}`}?
             </p>
             {isEdit ? (
               <p className="text-cut-red text-xs mb-4 flex items-center gap-1">
                 <AlertTriangle className="w-3 h-3" />
-                This is your final entry for the week. No more changes.
+                This is your final entry for this week. No more changes.
               </p>
             ) : (
               <p className="text-gray-400 text-xs mb-4">
