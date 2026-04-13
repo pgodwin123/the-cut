@@ -19,16 +19,16 @@ export default function ProfileCard({ profile, weighIns, isLeading, rank }) {
   const isPositiveProgress = totalLostKg > 0
 
   return (
-    <div className={`card p-4 lg:p-6 relative overflow-hidden ${isLeading ? 'glow-green' : ''}`}>
+    <div className={`card p-4 md:p-6 relative overflow-hidden ${isLeading ? 'glow-green' : ''}`}>
       {isLeading && (
         <div className="absolute top-3 right-3 bg-cut-green/10 text-cut-green text-xs font-bold px-2 py-1 rounded-full border border-cut-green/20">
           LEADING
         </div>
       )}
 
-      <div className="flex items-center gap-3 lg:gap-4 mb-3 lg:mb-5">
+      <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-5">
         <div
-          className="w-12 h-12 lg:w-16 lg:h-16 rounded-full border-2 border-gray-700 flex-shrink-0"
+          className="w-12 h-12 md:w-16 md:h-16 rounded-full border-2 border-gray-700 flex-shrink-0"
           style={{
             background: getAvatarUrl(profile?.photo_url)
               ? `url(${getAvatarUrl(profile.photo_url)}) center/cover no-repeat`
@@ -42,44 +42,44 @@ export default function ProfileCard({ profile, weighIns, isLeading, rank }) {
           )}
         </div>
         <div className="min-w-0">
-          <h3 className="font-display text-lg lg:text-2xl font-bold text-white truncate">{profile?.name || 'Player'}</h3>
-          <p className="text-xs lg:text-sm text-gray-400 italic truncate">{profile?.motivation || 'No motivation set'}</p>
+          <h3 className="font-display text-lg md:text-2xl font-bold text-white truncate">{profile?.name || 'Player'}</h3>
+          <p className="text-xs md:text-sm text-gray-400 italic truncate">{profile?.motivation || 'No motivation set'}</p>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-2">
-        <div className="card-inner p-2.5 lg:p-3.5">
+        <div className="card-inner p-2.5 md:p-3.5">
           <div className="text-xs text-gray-400 mb-1">Current</div>
-          <div className="font-display text-lg lg:text-2xl font-bold text-white">
+          <div className="font-display text-lg md:text-2xl font-bold text-white">
             {displayWeight(currentWeight)}
             <span className="text-xs text-gray-400 ml-1">{unit}</span>
           </div>
         </div>
 
-        <div className="card-inner p-2.5 lg:p-3.5">
+        <div className="card-inner p-2.5 md:p-3.5">
           <div className="text-xs text-gray-400 mb-1">Start</div>
-          <div className="font-display text-lg lg:text-2xl font-bold text-gray-300">
+          <div className="font-display text-lg md:text-2xl font-bold text-gray-300">
             {displayWeight(profile?.starting_weight)}
             <span className="text-xs text-gray-400 ml-1">{unit}</span>
           </div>
         </div>
 
-        <div className="card-inner p-2.5 lg:p-3.5">
+        <div className="card-inner p-2.5 md:p-3.5">
           <div className="text-xs text-gray-400 mb-1 flex items-center gap-1">
             {isPositiveProgress ? <TrendingDown className="w-3 h-3 text-cut-green" /> : <TrendingUp className="w-3 h-3 text-cut-red" />}
             Lost
           </div>
-          <div className={`font-display text-lg lg:text-2xl font-bold ${isPositiveProgress ? 'text-cut-green' : 'text-cut-red'}`}>
+          <div className={`font-display text-lg md:text-2xl font-bold ${isPositiveProgress ? 'text-cut-green' : 'text-cut-red'}`}>
             {displayDiff(totalLostKg)} {unit}
           </div>
         </div>
 
-        <div className="card-inner p-2.5 lg:p-3.5">
+        <div className="card-inner p-2.5 md:p-3.5">
           <div className="text-xs text-gray-400 mb-1 flex items-center gap-1">
             <Target className="w-3 h-3" />
             % Lost
           </div>
-          <div className={`font-display text-lg lg:text-2xl font-bold ${percentLost > 0 ? 'text-cut-green' : 'text-white'}`}>
+          <div className={`font-display text-lg md:text-2xl font-bold ${percentLost > 0 ? 'text-cut-green' : 'text-white'}`}>
             {percentLost.toFixed(1)}%
           </div>
         </div>

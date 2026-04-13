@@ -85,18 +85,18 @@ export default function LeaderBanner({ profiles, weighInsByUser }) {
 
   // Someone is leading
   return (
-    <div className="rounded-2xl p-4 lg:p-8 animate-slide-up relative overflow-hidden"
+    <div className="rounded-2xl p-4 md:p-8 animate-slide-up relative overflow-hidden"
       style={{ background: 'linear-gradient(135deg, #0a1a0a 0%, #0a0a0f 50%, #111118 100%)' }}
     >
       <div className="absolute inset-0 opacity-5"
         style={{ background: 'radial-gradient(circle at 30% 50%, #00ff87 0%, transparent 50%)' }}
       />
-      <div className="relative flex items-center gap-4 lg:gap-8">
+      <div className="relative flex items-center gap-4 md:gap-8">
         {/* Leader photo */}
         <div className="flex-shrink-0">
           <div className="relative">
             <div
-              className="w-14 h-14 lg:w-24 lg:h-24 rounded-full border-2 lg:border-4 border-cut-green/50"
+              className="w-14 h-14 md:w-24 md:h-24 rounded-full border-2 md:border-4 border-cut-green/50"
               style={{
                 background: getAvatarUrl(leader.photo_url)
                   ? `url(${getAvatarUrl(leader.photo_url)}) center/cover no-repeat`
@@ -105,30 +105,30 @@ export default function LeaderBanner({ profiles, weighInsByUser }) {
             >
               {!getAvatarUrl(leader.photo_url) && (
                 <div className="w-full h-full flex items-center justify-center">
-                  <User className="w-6 h-6 lg:w-10 lg:h-10 text-gray-600" />
+                  <User className="w-6 h-6 md:w-10 md:h-10 text-gray-600" />
                 </div>
               )}
             </div>
-            <div className="absolute -top-1 -right-1 lg:-top-2 lg:-right-2 w-6 h-6 lg:w-10 lg:h-10 bg-cut-gold rounded-full flex items-center justify-center">
-              <Crown className="w-3.5 h-3.5 lg:w-6 lg:h-6 text-gray-950" />
+            <div className="absolute -top-1 -right-1 md:-top-2 md:-right-2 w-6 h-6 md:w-10 md:h-10 bg-cut-gold rounded-full flex items-center justify-center">
+              <Crown className="w-3.5 h-3.5 md:w-6 md:h-6 text-gray-950" />
             </div>
           </div>
         </div>
 
         {/* Stats */}
         <div className="flex-1 min-w-0">
-          <p className="font-display text-lg lg:text-3xl font-black text-white leading-tight">
+          <p className="font-display text-lg md:text-3xl font-black text-white leading-tight">
             {leader.name} leads
           </p>
-          <p className="text-cut-green font-display text-xl lg:text-5xl font-black">
+          <p className="text-cut-green font-display text-xl md:text-5xl font-black">
             by {gap.toFixed(2)}%
           </p>
-          <div className="flex items-center gap-3 lg:gap-5 mt-1 lg:mt-3">
-            <span className="text-[11px] lg:text-sm text-gray-400">
+          <div className="flex items-center gap-3 md:gap-5 mt-1 md:mt-3">
+            <span className="text-[11px] md:text-sm text-gray-400">
               {leader.name}: <span className="text-cut-green font-semibold">{leader.percentLost.toFixed(2)}%</span>
             </span>
             <span className="text-gray-600">vs</span>
-            <span className="text-[11px] lg:text-sm text-gray-400">
+            <span className="text-[11px] md:text-sm text-gray-400">
               {trailer.name}: <span className="text-gray-300 font-semibold">{trailer.percentLost.toFixed(2)}%</span>
             </span>
           </div>

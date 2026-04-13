@@ -81,7 +81,7 @@ export default function Dashboard() {
   const showEditForm = canEdit
 
   return (
-    <div className="min-h-dvh px-3 sm:px-6 lg:px-10 py-4 sm:py-6 pb-8 max-w-lg lg:max-w-7xl mx-auto">
+    <div className="min-h-dvh px-3 sm:px-6 md:px-10 py-4 sm:py-6 pb-8 max-w-lg md:max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
@@ -113,7 +113,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="space-y-4 lg:space-y-5">
+      <div className="space-y-4 md:space-y-5">
         {/* LEADER BANNER — always full width, hero */}
         {profiles.length === 2 && (
           <LeaderBanner profiles={profiles} weighInsByUser={weighInsByUser} />
@@ -123,7 +123,7 @@ export default function Dashboard() {
         <WeighInReminder hasLoggedThisWeek={!!myCurrentWeekEntry} />
 
         {/* PROFILE CARDS — full width, side by side on tablet+, hero scale on desktop */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-5">
           {profiles.map(p => (
             <ProfileCard
               key={p.id}
@@ -138,15 +138,15 @@ export default function Dashboard() {
         <Countdown />
 
         {/* MAIN GRID: on desktop, chart takes 2 cols, sidebar 1 col */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
           {/* Chart — big on desktop */}
-          <div className="lg:col-span-2 space-y-4 lg:space-y-5">
+          <div className="md:col-span-2 space-y-4 md:space-y-5">
             <WeightChart profiles={profiles} weighInsByUser={weighInsByUser} />
             <StreakTracker profiles={profiles} weighInsByUser={weighInsByUser} />
           </div>
 
           {/* Right sidebar: weigh-in + race */}
-          <div className="space-y-4 lg:space-y-5">
+          <div className="space-y-4 md:space-y-5">
             <WeighInForm userWeighIns={myWeighIns} onComplete={fetchData} />
             {profiles.length === 2 && (
               <Leaderboard profiles={profiles} weighInsByUser={weighInsByUser} />
