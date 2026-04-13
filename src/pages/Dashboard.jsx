@@ -81,7 +81,7 @@ export default function Dashboard() {
   const showEditForm = canEdit
 
   return (
-    <div className="min-h-dvh px-3 sm:px-6 py-4 sm:py-6 pb-8 max-w-lg md:max-w-6xl mx-auto">
+    <div className="min-h-dvh px-3 sm:px-6 lg:px-10 py-4 sm:py-6 pb-8 max-w-lg lg:max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
@@ -113,43 +113,44 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="space-y-4">
-        {/* Who's Leading — top of everything, full width */}
+      <div className="space-y-4 lg:space-y-5">
+        {/* LEADER BANNER — always full width, hero */}
         {profiles.length === 2 && (
           <LeaderBanner profiles={profiles} weighInsByUser={weighInsByUser} />
         )}
 
-        {/* Weigh-in reminder */}
+        {/* Weigh-in reminder — full width */}
         <WeighInReminder hasLoggedThisWeek={!!myCurrentWeekEntry} />
 
-        {/* Desktop: 2-column grid from here. Mobile: stacked */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Left column */}
-          <div className="space-y-4">
-            <Countdown />
+        {/* PROFILE CARDS — full width, side by side on tablet+, hero scale on desktop */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-5">
+          {profiles.map(p => (
+            <ProfileCard
+              key={p.id}
+              profile={p}
+              weighIns={weighInsByUser[p.id] || []}
+              isLeading={p.id === leaderId}
+            />
+          ))}
+        </div>
 
-            {/* Profile cards — side by side on desktop, stacked on mobile */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {profiles.map(p => (
-                <ProfileCard
-                  key={p.id}
-                  profile={p}
-                  weighIns={weighInsByUser[p.id] || []}
-                  isLeading={p.id === leaderId}
-                />
-              ))}
-            </div>
+        {/* COUNTDOWN — spans full width */}
+        <Countdown />
 
-            <WeighInForm userWeighIns={myWeighIns} onComplete={fetchData} />
+        {/* MAIN GRID: on desktop, chart takes 2 cols, sidebar 1 col */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-5">
+          {/* Chart — big on desktop */}
+          <div className="lg:col-span-2 space-y-4 lg:space-y-5">
+            <WeightChart profiles={profiles} weighInsByUser={weighInsByUser} />
+            <StreakTracker profiles={profiles} weighInsByUser={weighInsByUser} />
           </div>
 
-          {/* Right column */}
-          <div className="space-y-4">
+          {/* Right sidebar: weigh-in + race */}
+          <div className="space-y-4 lg:space-y-5">
+            <WeighInForm userWeighIns={myWeighIns} onComplete={fetchData} />
             {profiles.length === 2 && (
               <Leaderboard profiles={profiles} weighInsByUser={weighInsByUser} />
             )}
-            <WeightChart profiles={profiles} weighInsByUser={weighInsByUser} />
-            <StreakTracker profiles={profiles} weighInsByUser={weighInsByUser} />
           </div>
         </div>
       </div>
